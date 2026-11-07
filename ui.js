@@ -1,295 +1,207 @@
-
 export function initializeUI(game) {
-
-    // ==========================================
-    // HTML ELEMENTS
-    // ==========================================
-
     const drawButton = document.getElementById("drawButton");
     const resetButton = document.getElementById("resetButton");
-
     const turnText = document.getElementById("turnText");
     const drawStatus = document.getElementById("drawStatus");
-
     const attackerCount = document.getElementById("attackerCount");
     const defenderCount = document.getElementById("defenderCount");
-
     const matchupGrid = document.getElementById("matchupGrid");
-
-
-    // ==========================================
-    // EVENT LISTENERS
-    // ==========================================
+    const battleResultsSection = document.getElementById("battleResults");
+    const battleSummary = document.getElementById("battleSummary");
+    const matchupResults = document.getElementById("matchupResults");
 
     drawButton.addEventListener("click", () => {
-
         game.drawNextCharacter();
-
         render();
-
     });
-
 
     resetButton.addEventListener("click", () => {
-
         game.resetGame();
-
         render();
-
     });
 
-
-    // ==========================================
-    // MAIN RENDER FUNCTION
-    // ==========================================
-
     function render() {
-
         const state = game.getGameState();
-
         renderDecks(state);
         renderDrawSection(state);
         renderMatchups(state);
-
+        renderBattleResults(state);
     }
-
-
-    // ==========================================
-    // UPDATE DECKS
-    // ==========================================
 
     function renderDecks(state) {
-
-        const attackerTotal = state.attackers.filter(
-            character => character !== null
-        ).length;
-
-        const defenderTotal = state.defenders.filter(
-            character => character !== null
-        ).length;
-
         attackerCount.textContent =
-            `${attackerTotal} / 5 placed`;
+            `${state.attackers.filter(character => character !== null).length} / 5 placed`;
 
         defenderCount.textContent =
-            `${defenderTotal} / 5 placed`;
-
+            `${state.defenders.filter(character => character !== null).length} / 5 placed`;
     }
-
-
-    // ==========================================
-    // UPDATE DRAW SECTION
-    // ==========================================
 
     function renderDrawSection(state) {
-
         const pending = state.pendingCharacter;
-
         const finished = state.drawCount >= 10;
 
-        // All characters placed
         if (finished) {
-
-            turnText.textContent = "ALL CHARACTERS PLACED!";
-
-            drawButton.textContent = "DRAWING COMPLETE";
-
+            turnText.textContent = "BATTLES COMPLETE!";
+            drawButton.textContent = "ALL CHARACTERS PLACED";
             drawButton.disabled = true;
-
-            drawStatus.textContent =
-                "All ten characters are on the board.";
-
+            drawStatus.textContent = "All five matchups have been calculated.";
             return;
-
         }
 
-        // Character waiting to be placed
         if (pending !== null) {
-
-            turnText.textContent =
-                `${pending.side.toUpperCase()}'S CHARACTER DRAWN`;
-
+            turnText.textContent = `${pending.side.toUpperCase()}'S CHARACTER DRAWN`;
             drawButton.textContent = "PLACE CHARACTER";
-
             drawButton.disabled = true;
-
             drawStatus.textContent =
                 `${pending.character.name} — choose an empty ${pending.side} slot.`;
-
             return;
-
         }
 
-        // Next turn
-        const nextSide = state.drawCount % 2 === 0
-            ? "attacker"
-            : "defender";
-
-        turnText.textContent =
-            `${nextSide.toUpperCase()}'S TURN`;
-
-        drawButton.textContent =
-            `DRAW ${nextSide.toUpperCase()}`;
-
+        const nextSide = state.drawCount % 2 === 0 ? "attacker" : "defender";
+        turnText.textContent = `${nextSide.toUpperCase()}'S TURN`;
+        drawButton.textContent = `DRAW ${nextSide.toUpperCase()}`;
         drawButton.disabled = false;
-
-        drawStatus.textContent =
-            "Draw your next character.";
-
+        drawStatus.textContent = "Draw your next character.";
     }
-
-
-    // ==========================================
-    // UPDATE MATCHUP GRID
-    // ==========================================
 
     function renderMatchups(state) {
-
         matchupGrid.innerHTML = "";
 
-        // Five rows, two columns
         for (let i = 0; i < 5; i++) {
-
-            const attackerCard = createCharacterCard(
-                "attacker",
-                i,
-                state
-            );
-
-            const defenderCard = createCharacterCard(
-                "defender",
-                i,
-                state
-            );
-
-            matchupGrid.appendChild(attackerCard);
-            matchupGrid.appendChild(defenderCard);
-
+            matchupGrid.appendChild(createCharacterCard("attacker", i, state));
+            matchupGrid.appendChild(createCharacterCard("defender", i, state));
         }
-
     }
 
-
-    // ==========================================
-    // CREATE CHARACTER CARD
-    // ==========================================
-
     function createCharacterCard(side, index, state) {
-
-        const slots = side === "attacker"
-            ? state.attackers
-            : state.defenders;
-
+        const slots = side === "attacker" ? state.attackers : state.defenders;
         const character = slots[index];
+        const result = state.battleResults?.matchups[index];
 
         const card = document.createElement("button");
-
         card.type = "button";
-
-        card.classList.add(
-            "character-card",
-            side
-        );
-
-
-        // ==========================================
-        // EMPTY CARD
-        // ==========================================
+        card.classList.add("character-card", side);
 
         if (character === null) {
-
             card.classList.add("empty");
 
             const pending = state.pendingCharacter;
-
-            const canPlace =
-                pending !== null &&
-                pending.side === side;
+            const canPlace = pending !== null && pending.side === side;
 
             if (canPlace) {
-
                 card.classList.add("available");
-
                 card.textContent = "PLACE HERE";
-
                 card.disabled = false;
-
                 card.addEventListener("click", () => {
-
                     game.placeCharacter(side, index);
-
                     render();
-
                 });
-
             } else {
-
                 card.textContent = `CARD ${index + 1}`;
-
                 card.disabled = true;
-
             }
 
             return card;
-
         }
 
-
-        // ==========================================
-        // CHARACTER CARD
-        // ==========================================
-
         const number = document.createElement("span");
+        number.className = "card-number";
+        number.textContent = `MATCHUP ${index + 1}`;
 
-        number.classList.add("card-number");
-
-        number.textContent = `CARD ${index + 1}`;
-
+        const image = document.createElement("img");
+        image.className = "character-image";
+        image.alt = character.name;
+        image.src = character.imageURL || "";
+        image.loading = "lazy";
+        image.onerror = () => {
+            image.hidden = true;
+        };
+        if (!character.imageURL) image.hidden = true;
 
         const name = document.createElement("span");
-
-        name.classList.add("card-name");
-
+        name.className = "card-name";
         name.textContent = character.name;
 
+        card.append(number, image, name);
 
-        card.appendChild(number);
-        card.appendChild(name);
+        if (result) {
+            const won = result.winner === side;
+            const draw = result.winner === null;
 
+            card.classList.add(draw ? "result-draw" : won ? "result-win" : "result-loss");
 
-        // ==========================================
-        // MATCHUP STATUS
-        // ==========================================
-
-        const matchupComplete =
-            state.attackers[index] !== null &&
-            state.defenders[index] !== null;
-
-        if (matchupComplete) {
-
+            const outcome = document.createElement("span");
+            outcome.className = "pair-label";
+            outcome.textContent = draw ? "DRAW" : won ? "WON MATCHUP" : "LOST MATCHUP";
+            card.appendChild(outcome);
+        } else if (state.attackers[index] !== null && state.defenders[index] !== null) {
             card.classList.add("paired");
-
             const pairLabel = document.createElement("span");
-
-            pairLabel.classList.add("pair-label");
-
-            pairLabel.textContent = "MATCHUP COMPLETE";
-
+            pairLabel.className = "pair-label";
+            pairLabel.textContent = "MATCHUP READY";
             card.appendChild(pairLabel);
-
         }
 
         card.disabled = true;
-
         return card;
-
     }
 
+    function renderBattleResults(state) {
+        const results = state.battleResults;
 
-    // ==========================================
-    // INITIAL DISPLAY
-    // ==========================================
+        if (!results) {
+            battleResultsSection.hidden = true;
+            return;
+        }
+
+        battleResultsSection.hidden = false;
+        matchupResults.innerHTML = "";
+
+        results.matchups.forEach(result => {
+            const row = document.createElement("div");
+            row.className = "result-row";
+
+            const names = document.createElement("span");
+            names.className = "result-names";
+            names.textContent =
+                `${result.characterA.name} vs ${result.characterB.name}`;
+
+            const outcome = document.createElement("span");
+            outcome.className = "result-outcome";
+
+            if (result.winner === "attacker") {
+                outcome.textContent = `${result.characterA.name} wins`;
+                outcome.classList.add("attacker-result");
+            } else if (result.winner === "defender") {
+                outcome.textContent = `${result.characterB.name} wins`;
+                outcome.classList.add("defender-result");
+            } else {
+                outcome.textContent = "Draw";
+                outcome.classList.add("draw-result");
+            }
+
+            row.append(names, outcome);
+            matchupResults.appendChild(row);
+        });
+
+        if (results.overallWinner === "attacker") {
+            battleSummary.textContent =
+                `ATTACKERS WIN ${results.attackerWins}–${results.defenderWins}`;
+            battleSummary.className = "battle-summary attacker-result";
+        } else if (results.overallWinner === "defender") {
+            battleSummary.textContent =
+                `DEFENDERS WIN ${results.defenderWins}–${results.attackerWins}`;
+            battleSummary.className = "battle-summary defender-result";
+        } else {
+            battleSummary.textContent =
+                `THE BATTLE IS A DRAW ${results.attackerWins}–${results.defenderWins}`;
+            battleSummary.className = "battle-summary draw-result";
+        }
+
+        if (results.draws > 0) {
+            battleSummary.textContent += ` (${results.draws} matchup${results.draws === 1 ? "" : "s"} tied)`;
+        }
+    }
 
     render();
-
 }

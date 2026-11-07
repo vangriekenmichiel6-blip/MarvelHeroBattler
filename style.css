@@ -352,3 +352,115 @@ body {
         border-color: white;
     }
 }
+
+/* CHARACTER IMAGES */
+
+.character-image {
+    width: 100%;
+    height: 112px;
+    object-fit: cover;
+    object-position: center 25%;
+    border-radius: 6px;
+    margin: 5px 0 8px;
+    background: #11131a;
+}
+
+/* BATTLE RESULTS */
+
+.battle-results-section {
+    margin: 28px 0;
+    padding: 18px 14px;
+    background: #1c1e27;
+    border: 1px solid #444;
+    border-radius: 12px;
+}
+
+.battle-results-section h2 {
+    text-align: center;
+    font-size: 19px;
+    letter-spacing: 2px;
+    margin-bottom: 14px;
+}
+
+.battle-summary {
+    text-align: center;
+    font-size: 18px;
+    font-weight: 800;
+    margin: 8px 0 18px;
+}
+
+.matchup-results {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.result-row {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 11px;
+    background: #14161d;
+    border-radius: 8px;
+}
+
+.result-names {
+    font-size: 13px;
+    font-weight: bold;
+    overflow-wrap: anywhere;
+}
+
+.result-outcome {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.attacker-result {
+    color: #ff6565;
+}
+
+.defender-result {
+    color: #62b5ff;
+}
+
+.draw-result {
+    color: #e6c76b;
+}
+
+.character-card.result-win {
+    border-width: 3px;
+    border-color: #38b66b;
+    opacity: 1;
+}
+
+.character-card.result-loss {
+    border-color: #8b4141;
+    opacity: 0.55;
+}
+
+.character-card.result-draw {
+    border-color: #c4a64c;
+    opacity: 1;
+}
+
+.character-card.result-win .pair-label {
+    color: #63dc91;
+}
+
+.character-card.result-loss .pair-label {
+    color: #e27b7b;
+}
+
+.character-card.result-draw .pair-label {
+    color: #e6c76b;
+}
+
+@media (max-width: 360px) {
+    .character-image {
+        height: 90px;
+    }
+
+    .result-row {
+        padding: 9px;
+    }
+}

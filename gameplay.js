@@ -1,155 +1,91 @@
-
 import { shuffle } from "./basics.js";
+import { calculateBattles } from "./battle.js";
 
 // ==========================================
 // CREATE GAME
 // ==========================================
 
 export function createGame(characters) {
+    if (!Array.isArray(characters) || characters.length < 10) {
+        throw new Error("createGame expects an array containing at least 10 characters.");
+    }
 
     let shuffledCharacters = shuffle([...characters]);
-
     let gameState;
 
-
-    // ==========================================
-    // RESET GAME
-    // ==========================================
-
     function resetGame() {
+        shuffledCharacters = shuffle([...characters]);
 
         gameState = {
-
-            // One shared deck containing all characters
             characterDeck: [...shuffledCharacters],
-
-            // Five slots for each side
             attackers: Array(5).fill(null),
             defenders: Array(5).fill(null),
-
-            // Character waiting to be placed
             pendingCharacter: null,
-
-            // Number of characters successfully placed
-            drawCount: 0
-
+            drawCount: 0,
+            battleResults: null
         };
-
     }
-
-
-    // ==========================================
-    // GET GAME STATE
-    // ==========================================
 
     function getGameState() {
-
         return gameState;
-
     }
 
-
-    // ==========================================
-    // DRAW NEXT CHARACTER
-    // ==========================================
-
     function drawNextCharacter() {
-
-        // Cannot draw while another character is waiting
-        if (gameState.pendingCharacter !== null) {
+        if (gameState.pendingCharacter !== null ||
+            gameState.drawCount >= 10 ||
+            gameState.characterDeck.length === 0) {
             return;
         }
 
-        // All ten characters have been placed
-        if (gameState.drawCount >= 10) {
-            return;
-        }
-
-        // Alternate between attackers and defenders
         const side = gameState.drawCount % 2 === 0
             ? "attacker"
             : "defender";
 
-        // Cannot draw if the deck is empty
-        if (gameState.characterDeck.length === 0) {
-            return;
-        }
-
-        // Draw next character from shared deck
         const character = gameState.characterDeck.pop();
 
-        // Store character until player places it
-        gameState.pendingCharacter = {
-            side,
-            character
-        };
-
+        gameState.pendingCharacter = { side, character };
     }
 
-
-    // ==========================================
-    // PLACE CHARACTER
-    // ==========================================
-
     function placeCharacter(side, index) {
-
         const pending = gameState.pendingCharacter;
 
-        // There must be a character waiting
-        if (pending === null) {
+        if (pending === null || pending.side !== side || gameState.battleResults !== null) {
             return;
         }
 
-        // Must place on the correct side
-        if (pending.side !== side) {
-            return;
-        }
-
-        // Get the correct slots
         const slots = side === "attacker"
             ? gameState.attackers
-            : gameState.defenders;
+            : side === "defender"
+                ? gameState.defenders
+                : null;
 
-        // Check that the slot exists and is empty
-        if (
+        if (!slots ||
             !Number.isInteger(index) ||
             index < 0 ||
             index >= 5 ||
-            slots[index] !== null
-        ) {
+            slots[index] !== null) {
             return;
         }
 
-        // Place character
         slots[index] = pending.character;
-
-        // Clear pending character
         gameState.pendingCharacter = null;
-
-        // Count successful placement
         gameState.drawCount++;
 
+        // The five adjacent pairs are now fixed. Calculate all battles.
+        if (gameState.drawCount === 10) {
+            gameState.battleResults = calculateBattles(
+                gameState.attackers,
+                gameState.defenders
+            );
+        }
     }
-
-
-    // ==========================================
-    // INITIALIZE
-    // ==========================================
 
     resetGame();
 
-
-    // ==========================================
-    // PUBLIC GAME FUNCTIONS
-    // ==========================================
-
     return {
-
         getGameState,
         drawNextCharacter,
         placeCharacter,
         resetGame
-
     };
-
 }
