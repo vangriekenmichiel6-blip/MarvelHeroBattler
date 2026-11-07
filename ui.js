@@ -1,12 +1,5 @@
 
-export function initializeUI({
-
-    getGameState,
-    drawNextCharacter,
-    placeCharacter,
-    resetGame
-
-}) {
+export function initializeUI(game) {
 
     // ==========================================
     // HTML ELEMENTS
@@ -25,25 +18,21 @@ export function initializeUI({
 
 
     // ==========================================
-    // DRAW BUTTON
+    // EVENT LISTENERS
     // ==========================================
 
     drawButton.addEventListener("click", () => {
 
-        drawNextCharacter();
+        game.drawNextCharacter();
 
         render();
 
     });
 
 
-    // ==========================================
-    // RESET BUTTON
-    // ==========================================
-
     resetButton.addEventListener("click", () => {
 
-        resetGame();
+        game.resetGame();
 
         render();
 
@@ -56,7 +45,7 @@ export function initializeUI({
 
     function render() {
 
-        const state = getGameState();
+        const state = game.getGameState();
 
         renderDecks(state);
         renderDrawSection(state);
@@ -98,12 +87,12 @@ export function initializeUI({
 
         const finished = state.drawCount >= 10;
 
-        // All characters have been placed
+        // All characters placed
         if (finished) {
 
             turnText.textContent = "ALL CHARACTERS PLACED!";
 
-            drawButton.textContent = "GAME READY";
+            drawButton.textContent = "DRAWING COMPLETE";
 
             drawButton.disabled = true;
 
@@ -114,32 +103,30 @@ export function initializeUI({
 
         }
 
-        // A character has been drawn and awaits placement
+        // Character waiting to be placed
         if (pending !== null) {
 
             turnText.textContent =
-                `${pending.side.toUpperCase()} DRAWN!`;
+                `${pending.side.toUpperCase()}'S CHARACTER DRAWN`;
 
             drawButton.textContent = "PLACE CHARACTER";
 
             drawButton.disabled = true;
 
             drawStatus.textContent =
-                `${pending.character} — choose an empty ${pending.side} slot below.`;
+                `${pending.character.name} — choose an empty ${pending.side} slot.`;
 
             return;
 
         }
 
-        // Waiting for the next draw
+        // Next turn
         const nextSide = state.drawCount % 2 === 0
             ? "attacker"
             : "defender";
 
         turnText.textContent =
-            nextSide === "attacker"
-                ? "ATTACKER'S TURN"
-                : "DEFENDER'S TURN";
+            `${nextSide.toUpperCase()}'S TURN`;
 
         drawButton.textContent =
             `DRAW ${nextSide.toUpperCase()}`;
@@ -147,7 +134,7 @@ export function initializeUI({
         drawButton.disabled = false;
 
         drawStatus.textContent =
-            "Draw a character to get started.";
+            "Draw your next character.";
 
     }
 
@@ -160,7 +147,7 @@ export function initializeUI({
 
         matchupGrid.innerHTML = "";
 
-        // Five rows, two cards per row
+        // Five rows, two columns
         for (let i = 0; i < 5; i++) {
 
             const attackerCard = createCharacterCard(
@@ -184,7 +171,7 @@ export function initializeUI({
 
 
     // ==========================================
-    // CREATE INDIVIDUAL CHARACTER CARD
+    // CREATE CHARACTER CARD
     // ==========================================
 
     function createCharacterCard(side, index, state) {
@@ -204,18 +191,20 @@ export function initializeUI({
             side
         );
 
-        // Is there a character waiting to be placed?
-        const pending = state.pendingCharacter;
 
-        const canPlace =
-            pending !== null &&
-            pending.side === side &&
-            character === null;
+        // ==========================================
+        // EMPTY CARD
+        // ==========================================
 
-        // Empty card
         if (character === null) {
 
             card.classList.add("empty");
+
+            const pending = state.pendingCharacter;
+
+            const canPlace =
+                pending !== null &&
+                pending.side === side;
 
             if (canPlace) {
 
@@ -227,7 +216,7 @@ export function initializeUI({
 
                 card.addEventListener("click", () => {
 
-                    placeCharacter(side, index);
+                    game.placeCharacter(side, index);
 
                     render();
 
@@ -245,23 +234,33 @@ export function initializeUI({
 
         }
 
-        // Character card
+
+        // ==========================================
+        // CHARACTER CARD
+        // ==========================================
+
         const number = document.createElement("span");
 
         number.classList.add("card-number");
 
         number.textContent = `CARD ${index + 1}`;
 
+
         const name = document.createElement("span");
 
         name.classList.add("card-name");
 
-        name.textContent = character;
+        name.textContent = character.name;
+
 
         card.appendChild(number);
         card.appendChild(name);
 
-        // Check whether both sides of this row are occupied
+
+        // ==========================================
+        // MATCHUP STATUS
+        // ==========================================
+
         const matchupComplete =
             state.attackers[index] !== null &&
             state.defenders[index] !== null;
