@@ -1,5 +1,5 @@
 
-import { characters } from "./characters.js";
+import { loadCharacters } from "./characters.js";
 
 import { createGame } from "./gameplay.js";
 
@@ -16,7 +16,7 @@ import { initializeUI } from "./ui.js";
 const gameModes = {
 
     standard: {
-        characters
+        loadCharacters
     }
 
 };
@@ -26,7 +26,7 @@ const gameModes = {
 // START GAME
 // ==========================================
 
-function startGame(mode = "standard") {
+async function startGame(mode = "standard") {
 
     const selectedMode = gameModes[mode];
 
@@ -35,17 +35,22 @@ function startGame(mode = "standard") {
         return;
     }
 
-    const game = createGame(
-        selectedMode.characters
-    );
+    // Load characters from CSV
+    const characters = await selectedMode.loadCharacters();
+
+    console.log("Loaded characters:", characters);
+
+    // Create game using the loaded characters
+    const game = createGame(characters);
 
     initializeUI(game);
 
 }
 
-
 // ==========================================
 // APPLICATION START
 // ==========================================
 
-startGame("standard");
+startGame("standard").catch(error => {
+    console.error("Failed to start game:", error);
+});
