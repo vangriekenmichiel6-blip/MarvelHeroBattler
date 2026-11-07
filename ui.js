@@ -128,6 +128,10 @@ export function initializeUI(game) {
             const won = result.winner === side;
             const draw = result.winner === null;
 
+            if (result.closeBattle) {
+                card.classList.add("close-battle-card");
+            }
+
             card.classList.add(draw ? "result-draw" : won ? "result-win" : "result-loss");
 
             const outcome = document.createElement("span");
@@ -181,6 +185,15 @@ export function initializeUI(game) {
             }
 
             row.append(names, outcome);
+
+            // Show close battle indicator
+            if (result.closeBattle) {
+                const closeLabel = document.createElement("span");
+                closeLabel.className = "close-battle-label";
+                closeLabel.textContent = "⚡ CLOSE BATTLE!";
+                row.appendChild(closeLabel);
+            }
+
             matchupResults.appendChild(row);
         });
 

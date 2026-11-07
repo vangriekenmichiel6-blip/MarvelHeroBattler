@@ -264,16 +264,25 @@ export const characters = [
     }),
 
     new Character({
-        id: "ant-man",
-        name: "Ant-Man",
-        imageURL: "https://image.tmdb.org/t/p/original/ldbZrlnnguZNbhS3bCgCLaDYsLo.jpg",
-        hero: true,
-        stats: {
-            attackSpeed: 3, strength: 4, armorPiercing: 4,
-            combatSkill: 2, sorcery: 1, weapons: 2,
-            range: 1, speed: 4, armor: 4, agility: 8,
-            shield: 2, flying: 3, intelligence: 3
-        }
-    })
+    id: "ant-man",
+    name: "Ant-Man",
+    imageURL: "https://image.tmdb.org/t/p/original/ldbZrlnnguZNbhS3bCgCLaDYsLo.jpg",
+    hero: true,
+    stats: {
+        attackSpeed: 3,
+        strength: 5,
+        armorPiercing: 4,
+        combatSkill: 2,
+        sorcery: 1,
+        weapons: 3,
+        range: 1,
+        speed: 5,
+        armor: 5,
+        agility: 9,
+        shield: 2,
+        flying: 3,
+        intelligence: 3
+    }
+}),
 
 ];
