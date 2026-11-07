@@ -1,4 +1,3 @@
-console.log("GAMEPLAY.JS LOADED");
 
 import { shuffle } from "./basics.js";
 
@@ -6,7 +5,9 @@ import { shuffle } from "./basics.js";
 // CREATE GAME
 // ==========================================
 
-export function createGame(attackerCharacters, defenderCharacters) {
+export function createGame(characters) {
+
+    let shuffledCharacters = shuffle([...characters]);
 
     let gameState;
 
@@ -19,9 +20,8 @@ export function createGame(attackerCharacters, defenderCharacters) {
 
         gameState = {
 
-            // Remaining characters in each deck
-            attackerDeck: shuffle(attackerCharacters),
-            defenderDeck: shuffle(defenderCharacters),
+            // One shared deck containing all characters
+            characterDeck: [...shuffledCharacters],
 
             // Five slots for each side
             attackers: Array(5).fill(null),
@@ -54,7 +54,6 @@ export function createGame(attackerCharacters, defenderCharacters) {
     // ==========================================
 
     function drawNextCharacter() {
-        console.log("DRAW FUNCTION CALLED");
 
         // Cannot draw while another character is waiting
         if (gameState.pendingCharacter !== null) {
@@ -71,19 +70,13 @@ export function createGame(attackerCharacters, defenderCharacters) {
             ? "attacker"
             : "defender";
 
-        const deck = side === "attacker"
-            ? gameState.attackerDeck
-            : gameState.defenderDeck;
+        // Cannot draw if the deck is empty
+        if (gameState.characterDeck.length === 0) {
+            return;
+        }
 
-        // Draw random character
-        const randomIndex = Math.floor(
-            Math.random() * deck.length
-        );
-
-        const character = deck.splice(randomIndex, 1)[0];
-
-        console.log("DRAWN CHARACTER:", character);
-        console.log("CHARACTER NAME:", character.name);   
+        // Draw next character from shared deck
+        const character = gameState.characterDeck.pop();
 
         // Store character until player places it
         gameState.pendingCharacter = {

@@ -1,5 +1,5 @@
 
-import { attackers, defenders } from "./characters.js";
+import { characters } from "./characters.js";
 
 import { createGame } from "./gameplay.js";
 
@@ -16,8 +16,7 @@ import { initializeUI } from "./ui.js";
 const gameModes = {
 
     standard: {
-        attackers,
-        defenders
+        characters
     }
 
 };
@@ -37,8 +36,7 @@ function startGame(mode = "standard") {
     }
 
     const game = createGame(
-        selectedMode.attackers,
-        selectedMode.defenders
+        selectedMode.characters
     );
 
     initializeUI(game);
