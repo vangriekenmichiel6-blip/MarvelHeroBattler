@@ -24,6 +24,7 @@ export function createGame(characters) {
         shuffledCharacters = shuffle([...characters]);
 
         gameState = {
+            mode: "standard",
             characterDeck: [...shuffledCharacters],
             attackers: Array(5).fill(null),
             defenders: Array(5).fill(null),

@@ -16,6 +16,8 @@ export function initializeUI(game) {
     const battleSummary = document.getElementById("battleSummary");
     const matchupResults = document.getElementById("matchupResults");
     const currentCharacter = document.getElementById("currentCharacter");
+    const boardTitle = document.getElementById("boardTitle");
+    const battleResultsTitle = document.getElementById("battleResultsTitle");
 
     // ==========================================
     // BATTLE POPUP ELEMENTS
@@ -33,9 +35,15 @@ export function initializeUI(game) {
     const battleStatus = document.getElementById("battleStatus");
     const continueBattleButton =
         document.getElementById("continueBattleButton");
+    const winnerPopup = document.getElementById("winnerPopup");
+    const winnerTitle = document.getElementById("winnerTitle");
+    const winnerMessage = document.getElementById("winnerMessage");
+    const winnerCloseButton = document.getElementById("winnerCloseButton");
+    const backToModesButton = document.getElementById("backToModesButton");
 
     let currentBattle = null;
     let animationToken = 0;
+    let winnerPopupDismissed = false;
 
     // ==========================================
     // RESET
@@ -47,20 +55,24 @@ export function initializeUI(game) {
         currentBattle = null;
 
         game.resetGame();
-
+        winnerPopupDismissed = false;
         battlePopup.hidden = true;
-
+        winnerPopup.hidden = true;
         render();
     });
 
     continueBattleButton.addEventListener("click", () => {
-
         game.finishBattle();
-
         currentBattle = null;
-
         render();
     });
+
+    winnerCloseButton.addEventListener("click", () => {
+        winnerPopupDismissed = true;
+        winnerPopup.hidden = true;
+    });
+
+    backToModesButton.addEventListener("click", () => window.location.reload());
 
     // ==========================================
     // RENDER EVERYTHING
@@ -70,11 +82,19 @@ export function initializeUI(game) {
 
         const state = game.getGameState();
 
+        boardTitle.textContent = state.mode === "tournament"
+            ? "TOURNAMENT BOARD"
+            : "YOUR MATCHUPS";
+        battleResultsTitle.textContent = state.mode === "tournament"
+            ? "BATTLE HISTORY"
+            : "BATTLE RESULTS";
+
         renderDecks(state);
         renderDrawSection(state);
         renderMatchups(state);
         renderBattleResults(state);
         renderBattlePopup(state);
+        renderWinnerPopup(state);
     }
 
     // ==========================================
@@ -83,11 +103,17 @@ export function initializeUI(game) {
 
     function renderDecks(state) {
 
-        attackerCount.textContent =
-            `${state.attackers.filter(c => c !== null).length} / 5 placed`;
-
-        defenderCount.textContent =
-            `${state.defenders.filter(c => c !== null).length} / 5 placed`;
+        if (state.mode === "tournament") {
+            attackerCount.textContent =
+                `${state.attackerDeck.length} cards left · ${state.attackers.filter(c => c !== null).length} surviving`;
+            defenderCount.textContent =
+                `${state.defenderDeck.length} cards left · ${state.defenders.filter(c => c !== null).length} surviving`;
+        } else {
+            attackerCount.textContent =
+                `${state.attackers.filter(c => c !== null).length} / 5 placed`;
+            defenderCount.textContent =
+                `${state.defenders.filter(c => c !== null).length} / 5 placed`;
+        }
     }
 
     // ==========================================
@@ -111,11 +137,8 @@ export function initializeUI(game) {
         }
 
         if (finished) {
-
-            turnText.textContent = "BATTLES COMPLETE!";
-            drawStatus.textContent =
-                "All five matchups have been calculated.";
-
+            turnText.textContent = "GAME OVER!";
+            drawStatus.textContent = "The game has ended.";
             return;
         }
 
@@ -126,8 +149,9 @@ export function initializeUI(game) {
 
         turnText.textContent = `${side.toUpperCase()}'S CHARACTER`;
 
-        drawStatus.textContent =
-            `Place ${character.name} in an empty ${side} slot.`;
+        drawStatus.textContent = state.mode === "tournament"
+            ? `Place ${character.name} in an empty ${side} position.`
+            : `Place ${character.name} in an empty ${side} slot.`;
 
         const image = document.createElement("img");
         image.className = "drawn-character-image";
@@ -374,11 +398,12 @@ export function initializeUI(game) {
     // ==========================================
 
     function renderBattleResults(state) {
-
         const results = state.battleResults;
+        const history = state.mode === "tournament"
+            ? state.battleHistory
+            : (results ? results.matchups : []);
 
-        if (!results) {
-
+        if (!results && history.length === 0) {
             battleResultsSection.hidden = true;
             return;
         }
@@ -386,100 +411,79 @@ export function initializeUI(game) {
         battleResultsSection.hidden = false;
         matchupResults.innerHTML = "";
 
-        results.matchups.forEach(result => {
+        if (state.mode === "tournament" && !results) {
+            battleSummary.textContent = `${history.length} BATTLE${history.length === 1 ? "" : "S"} FOUGHT`;
+            battleSummary.className = "battle-summary";
+        } else if (results) {
+            if (results.overallWinner === "attacker") {
+                battleSummary.textContent = `ATTACKERS WIN ${results.attackerWins}–${results.defenderWins}`;
+                battleSummary.className = "battle-summary attacker-result";
+            } else if (results.overallWinner === "defender") {
+                battleSummary.textContent = `DEFENDERS WIN ${results.defenderWins}–${results.attackerWins}`;
+                battleSummary.className = "battle-summary defender-result";
+            } else {
+                battleSummary.textContent = `THE BATTLE IS A DRAW ${results.attackerWins}–${results.defenderWins}`;
+                battleSummary.className = "battle-summary draw-result";
+            }
+            if (results.draws > 0) {
+                battleSummary.textContent += ` (${results.draws} matchup${results.draws === 1 ? "" : "s"} tied)`;
+            }
+        }
 
+        history.forEach(result => {
             const row = document.createElement("div");
             row.className = "result-row";
 
             const names = document.createElement("span");
             names.className = "result-names";
-
-            names.textContent =
-                `${result.characterA.name} vs ${result.characterB.name}`;
+            names.textContent = `${result.characterA.name} vs ${result.characterB.name}`;
 
             const outcome = document.createElement("span");
             outcome.className = "result-outcome";
 
             if (result.winner === "attacker") {
-
-                outcome.textContent = result.againstAllOdds
-                    ? `Against all odds, ${result.characterA.name} won the match!`
-                    : `${result.characterA.name} wins`;
-
-                outcome.classList.add(
-                    result.againstAllOdds
-                        ? "against-odds-result"
-                        : "attacker-result"
-                );
-
+                outcome.textContent = `${result.characterA.name} wins`;
+                outcome.classList.add("attacker-result");
             } else if (result.winner === "defender") {
-
-                outcome.textContent = result.againstAllOdds
-                    ? `Against all odds, ${result.characterB.name} won the match!`
-                    : `${result.characterB.name} wins`;
-
-                outcome.classList.add(
-                    result.againstAllOdds
-                        ? "against-odds-result"
-                        : "defender-result"
-                );
-
+                outcome.textContent = `${result.characterB.name} wins`;
+                outcome.classList.add("defender-result");
             } else {
-
-                outcome.textContent = "Draw";
+                outcome.textContent = state.mode === "tournament"
+                    ? "Draw — both characters return to their decks"
+                    : "Draw";
                 outcome.classList.add("draw-result");
-
             }
 
             row.append(names, outcome);
 
             if (result.closeBattle) {
-
                 const closeLabel = document.createElement("span");
-
                 closeLabel.className = "close-battle-label";
                 closeLabel.textContent = "⚡ CLOSE BATTLE!";
-
                 row.appendChild(closeLabel);
             }
 
             matchupResults.appendChild(row);
         });
+    }
 
-        // ======================================
-        // OVERALL WINNER
-        // ======================================
-
-        if (results.overallWinner === "attacker") {
-
-            battleSummary.textContent =
-                `ATTACKERS WIN ${results.attackerWins}–${results.defenderWins}`;
-
-            battleSummary.className =
-                "battle-summary attacker-result";
-
-        } else if (results.overallWinner === "defender") {
-
-            battleSummary.textContent =
-                `DEFENDERS WIN ${results.defenderWins}–${results.attackerWins}`;
-
-            battleSummary.className =
-                "battle-summary defender-result";
-
-        } else {
-
-            battleSummary.textContent =
-                `THE BATTLE IS A DRAW ${results.attackerWins}–${results.defenderWins}`;
-
-            battleSummary.className =
-                "battle-summary draw-result";
+    function renderWinnerPopup(state) {
+        const results = state.battleResults;
+        if (!results || winnerPopupDismissed) {
+            winnerPopup.hidden = true;
+            return;
         }
 
-        if (results.draws > 0) {
+        winnerPopup.hidden = false;
+        winnerTitle.textContent = results.overallWinner === "draw"
+            ? "IT'S A DRAW!"
+            : results.overallWinner === "attacker"
+                ? "ATTACKERS WIN!"
+                : "DEFENDERS WIN!";
 
-            battleSummary.textContent +=
-                ` (${results.draws} matchup${results.draws === 1 ? "" : "s"} tied)`;
-        }
+        winnerMessage.textContent = state.mode === "tournament"
+            ? `${results.reason} Final survivors: ${results.attackerSurvivors} attackers vs ${results.defenderSurvivors} defenders.`
+            : `${results.attackerWins} victories for the attackers and ${results.defenderWins} for the defenders.`;
     }
 
     render();

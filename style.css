@@ -748,3 +748,98 @@ body {
         font-size: 14px;
     }
 }
+
+
+/* ==========================================
+   GAME MODE SELECTION
+========================================== */
+
+.mode-select-screen {
+    width: min(100% - 30px, 520px);
+    margin: 0 auto;
+    padding: 55px 0;
+    text-align: center;
+}
+
+.mode-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 35px;
+}
+
+.mode-button {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 23px 18px;
+    border: 2px solid #555;
+    border-radius: 12px;
+    background: #1c1e27;
+    color: white;
+    cursor: pointer;
+    text-align: left;
+    transition: 0.2s;
+}
+
+.mode-button:hover {
+    border-color: #e62429;
+    background: #292b36;
+    transform: translateY(-2px);
+}
+
+.mode-button strong {
+    font-size: 21px;
+    letter-spacing: 2px;
+}
+
+.mode-button span {
+    color: #bbb;
+    font-size: 13px;
+}
+
+.game-mode-title {
+    text-align: center;
+    letter-spacing: 3px;
+    margin: 0 0 20px;
+}
+
+.game-controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+.game-controls .reset-button {
+    margin: 0;
+}
+
+.winner-popup-content h2 {
+    font-size: 27px;
+    letter-spacing: 2px;
+    margin-bottom: 15px;
+}
+
+.winner-popup-content p {
+    color: #ddd;
+    line-height: 1.5;
+    margin-bottom: 22px;
+}
+
+#winnerCloseButton {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    background: #e62429;
+    color: white;
+    font-weight: 900;
+    letter-spacing: 2px;
+    cursor: pointer;
+}
+
+#winnerCloseButton:hover {
+    background: #ff4247;
+}

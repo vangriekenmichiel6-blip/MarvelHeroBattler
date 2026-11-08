@@ -1,56 +1,32 @@
-
 import { loadCharacters } from "./characters.js";
-
 import { createGame } from "./gameplay.js";
-
+import { createTournamentGame } from "./tournament.js";
 import { initializeUI } from "./ui.js";
 
+const modeSelectScreen = document.getElementById("modeSelectScreen");
+const gameScreen = document.getElementById("gameScreen");
+const modeButtons = document.querySelectorAll("[data-game-mode]");
 
-// ==========================================
-// GAME MODES
-// ==========================================
+async function startGame(mode) {
+    try {
+        const characters = await loadCharacters();
+        const game = mode === "tournament"
+            ? createTournamentGame(characters)
+            : createGame(characters);
 
-// Later, we can add other game modes here.
-// For example: Blind Ranking, Tournament, etc.
-
-const gameModes = {
-
-    standard: {
-        loadCharacters
+        modeSelectScreen.hidden = true;
+        gameScreen.hidden = false;
+        document.getElementById("gameModeTitle").textContent =
+            mode === "tournament" ? "TOURNAMENT" : "5V5";
+        initializeUI(game);
+    } catch (error) {
+        console.error("Failed to start game:", error);
+        alert(error.message || "Could not start the game.");
     }
-
-};
-
-
-// ==========================================
-// START GAME
-// ==========================================
-
-async function startGame(mode = "standard") {
-
-    const selectedMode = gameModes[mode];
-
-    if (!selectedMode) {
-        console.error("Unknown game mode:", mode);
-        return;
-    }
-
-    // Load characters from CSV
-    const characters = await selectedMode.loadCharacters();
-
-    console.log("Loaded characters:", characters);
-
-    // Create game using the loaded characters
-    const game = createGame(characters);
-
-    initializeUI(game);
-
 }
 
-// ==========================================
-// APPLICATION START
-// ==========================================
-
-startGame("standard").catch(error => {
-    console.error("Failed to start game:", error);
+modeButtons.forEach(button => {
+    button.addEventListener("click", () => {
+        startGame(button.dataset.gameMode);
+    });
 });
