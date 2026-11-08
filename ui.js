@@ -1,5 +1,4 @@
 export function initializeUI(game) {
-    const drawButton = document.getElementById("drawButton");
     const resetButton = document.getElementById("resetButton");
     const turnText = document.getElementById("turnText");
     const drawStatus = document.getElementById("drawStatus");
@@ -9,11 +8,7 @@ export function initializeUI(game) {
     const battleResultsSection = document.getElementById("battleResults");
     const battleSummary = document.getElementById("battleSummary");
     const matchupResults = document.getElementById("matchupResults");
-
-    drawButton.addEventListener("click", () => {
-        game.drawNextCharacter();
-        render();
-    });
+    const currentCharacter = document.getElementById("currentCharacter");
 
     resetButton.addEventListener("click", () => {
         game.resetGame();
@@ -36,33 +31,49 @@ export function initializeUI(game) {
             `${state.defenders.filter(character => character !== null).length} / 5 placed`;
     }
 
+    
     function renderDrawSection(state) {
         const pending = state.pendingCharacter;
         const finished = state.drawCount >= 10;
 
+        currentCharacter.innerHTML = "";
+
         if (finished) {
             turnText.textContent = "BATTLES COMPLETE!";
-            drawButton.textContent = "ALL CHARACTERS PLACED";
-            drawButton.disabled = true;
             drawStatus.textContent = "All five matchups have been calculated.";
             return;
         }
 
-        if (pending !== null) {
-            turnText.textContent = `${pending.side.toUpperCase()}'S CHARACTER DRAWN`;
-            drawButton.textContent = "PLACE CHARACTER";
-            drawButton.disabled = true;
-            drawStatus.textContent =
-                `${pending.character.name} — choose an empty ${pending.side} slot.`;
-            return;
+        const side = pending.side;
+        const character = pending.character;
+
+        turnText.textContent = `${side.toUpperCase()}'S CHARACTER`;
+
+        drawStatus.textContent =
+            `Place ${character.name} in an empty ${side} slot.`;
+
+        // Character image
+        const image = document.createElement("img");
+        image.className = "drawn-character-image";
+        image.alt = character.name;
+        image.src = character.imageURL || "";
+
+        if (!character.imageURL) {
+            image.hidden = true;
         }
 
-        const nextSide = state.drawCount % 2 === 0 ? "attacker" : "defender";
-        turnText.textContent = `${nextSide.toUpperCase()}'S TURN`;
-        drawButton.textContent = `DRAW ${nextSide.toUpperCase()}`;
-        drawButton.disabled = false;
-        drawStatus.textContent = "Draw your next character.";
+        image.onerror = () => {
+            image.hidden = true;
+        };
+
+        // Character name
+        const name = document.createElement("span");
+        name.className = "drawn-character-name";
+        name.textContent = character.name;
+
+        currentCharacter.append(image, name);
     }
+
 
     function renderMatchups(state) {
         matchupGrid.innerHTML = "";

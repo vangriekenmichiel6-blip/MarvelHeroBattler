@@ -1,3 +1,4 @@
+
 import { shuffle } from "./basics.js";
 import { calculateBattles } from "./battle.js";
 
@@ -24,6 +25,9 @@ export function createGame(characters) {
             drawCount: 0,
             battleResults: null
         };
+
+        // Automatically reveal the first character
+        drawNextCharacter();
     }
 
     function getGameState() {
@@ -71,13 +75,17 @@ export function createGame(characters) {
         gameState.pendingCharacter = null;
         gameState.drawCount++;
 
-        // The five adjacent pairs are now fixed. Calculate all battles.
+        // Calculate battles after the final placement
         if (gameState.drawCount === 10) {
             gameState.battleResults = calculateBattles(
                 gameState.attackers,
                 gameState.defenders
             );
+            return;
         }
+
+        // Automatically reveal the next character
+        drawNextCharacter();
     }
 
     resetGame();
