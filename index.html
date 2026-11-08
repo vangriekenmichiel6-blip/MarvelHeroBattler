@@ -47,7 +47,7 @@
 
             <div id="currentCharacter" class="current-character">
                 <!-- Character image and name appear here -->
-            /div>
+            </div>
 
             <p id="drawStatus">The attacker draws first.</p>
 
@@ -84,6 +84,53 @@
             <p id="battleSummary" class="battle-summary"></p>
             <div id="matchupResults" class="matchup-results"></div>
         </section>
+        
+        <!-- BATTLE POPUP -->
+
+        <div id="battlePopup" class="battle-popup" hidden>
+
+            <div class="battle-popup-content">
+
+                <h2 id="battleTitle">MATCHUP 1</h2>
+
+                <div class="battle-characters">
+
+                    <div class="battle-character attacker">
+                        <img id="battleImageA" src="" alt="">
+                        <h3 id="battleNameA">ATTACKER</h3>
+                    </div>
+
+                    <div class="battle-vs">VS</div>
+
+                    <div class="battle-character defender">
+                        <img id="battleImageB" src="" alt="">
+                        <h3 id="battleNameB">DEFENDER</h3>
+                    </div>
+
+                </div>
+
+                <div class="battle-bar-section">
+
+                    <div class="battle-bar-labels">
+                        <span id="battleLabelA">ATTACKER</span>
+                        <span id="battleLabelB">DEFENDER</span>
+                    </div>
+
+                    <div class="battle-bar-track">
+                        <div id="battleBar" class="battle-bar-fill"></div>
+                    </div>
+
+                </div>
+
+                <h2 id="battleStatus">THE BATTLE IS ON!</h2>
+
+                <button id="continueBattleButton" hidden>
+                    CONTINUE
+                </button>
+
+            </div>
+
+        </div>
 
         <!-- RESET -->
 

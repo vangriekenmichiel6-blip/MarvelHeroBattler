@@ -512,3 +512,239 @@ body {
 .against-odds-card {
     border-color: #e0a32e;
 }
+
+
+/* ==========================================
+   BATTLE POPUP
+========================================== */
+
+.battle-popup {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.88);
+
+    backdrop-filter: blur(6px);
+}
+
+.battle-popup[hidden] {
+    display: none;
+}
+
+.battle-popup-content {
+    width: 100%;
+    max-width: 480px;
+
+    padding: 25px 18px;
+
+    background: #1c1e27;
+    border: 2px solid #444;
+    border-radius: 16px;
+
+    text-align: center;
+
+    box-shadow: 0 0 35px #000;
+    animation: popupAppear 0.3s ease-out;
+}
+
+@keyframes popupAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.85);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* TITLE */
+
+#battleTitle {
+    font-size: 20px;
+    letter-spacing: 3px;
+    margin-bottom: 25px;
+}
+
+/* CHARACTERS */
+
+.battle-characters {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+}
+
+.battle-character {
+    min-width: 0;
+}
+
+.battle-character img {
+    width: 100%;
+    height: 190px;
+
+    object-fit: cover;
+    object-position: center 25%;
+
+    border-radius: 10px;
+    background: #101116;
+}
+
+.battle-character h3 {
+    font-size: 13px;
+    margin-top: 10px;
+    overflow-wrap: anywhere;
+}
+
+.battle-character.attacker h3 {
+    color: #ff6565;
+}
+
+.battle-character.defender h3 {
+    color: #62b5ff;
+}
+
+.battle-vs {
+    font-size: 17px;
+    font-weight: 900;
+    color: #888;
+}
+
+/* BATTLE BAR */
+
+.battle-bar-section {
+    margin: 30px 0 25px;
+}
+
+.battle-bar-labels {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+
+    margin-bottom: 9px;
+
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.battle-bar-labels span {
+    max-width: 48%;
+    overflow-wrap: anywhere;
+}
+
+#battleLabelA {
+    color: #ff6565;
+}
+
+#battleLabelB {
+    color: #62b5ff;
+    text-align: right;
+}
+
+.battle-bar-track {
+    width: 100%;
+    height: 22px;
+
+    background: #2588df;
+    border-radius: 20px;
+    overflow: hidden;
+
+    border: 2px solid #ffffff33;
+}
+
+.battle-bar-fill {
+    width: 50%;
+    height: 100%;
+
+    background: #e62429;
+
+    transition: width 200ms ease-in-out;
+}
+
+/* BATTLE STATUS */
+
+#battleStatus {
+    min-height: 45px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 17px;
+    line-height: 1.4;
+    margin-bottom: 15px;
+}
+
+#battleStatus.draw-result {
+    color: #e6c76b;
+}
+
+#battleStatus.against-odds-result {
+    color: #e0a32e;
+}
+
+#battleStatus.attacker-result {
+    color: #ff6565;
+}
+
+#battleStatus.defender-result {
+    color: #62b5ff;
+}
+
+/* CONTINUE BUTTON */
+
+#continueBattleButton {
+    width: 100%;
+    padding: 15px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: #e62429;
+    color: white;
+
+    font-size: 15px;
+    font-weight: 900;
+    letter-spacing: 2px;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+#continueBattleButton:hover {
+    background: #ff4247;
+    transform: scale(1.02);
+}
+
+#continueBattleButton[hidden] {
+    display: none;
+}
+
+/* SMALL SCREENS */
+
+@media (max-width: 360px) {
+
+    .battle-popup-content {
+        padding: 20px 12px;
+    }
+
+    .battle-character img {
+        height: 145px;
+    }
+
+    .battle-character h3 {
+        font-size: 11px;
+    }
+
+    #battleStatus {
+        font-size: 14px;
+    }
+}
