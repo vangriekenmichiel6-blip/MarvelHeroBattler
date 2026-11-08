@@ -1,3 +1,4 @@
+import { animateBattle } from "./battleAnimation.js";
 
 export function initializeUI(game) {
 
@@ -356,129 +357,16 @@ export function initializeUI(game) {
         battleBar.style.transition = "none";
         battleBar.style.width = "50%";
 
-        animateBattle(result, token);
-    }
-
-    // ==========================================
-    // BATTLE ANIMATION
-    // ==========================================
-
-    function wait(milliseconds) {
-
-        return new Promise(resolve => {
-            setTimeout(resolve, milliseconds);
-        });
-    }
-
-    async function animateBattle(result, token) {
-
-        const attackerChance = result.attackerWinChance;
-        const defenderChance = result.defenderWinChance;
-
-        const underdogChance = Math.min(
-            attackerChance,
-            defenderChance
-        );
-
-        // Number of swings increases with battle closeness.
-
-        const swings = 2 + Math.round(underdogChance * 14);
-
-        // Close battles take longer to animate.
-
-        const stepDuration =
-            180 + underdogChance * 350;
-
-        const isDraw = result.winner === null;
-
-        const target = isDraw
-            ? 50
-            : result.winner === "attacker"
-                ? 100
-                : 0;
-
-        // Let the popup appear before the animation.
-
-        await wait(350);
-
-        if (token !== animationToken) return;
-
-        for (let i = 0; i < swings; i++) {
-
-            const progress = (i + 1) / swings;
-
-            // Gradually move towards the final result.
-
-            const base =
-                50 + (target - 50) * progress;
-
-            // Add diminishing back-and-forth movement.
-
-            const amplitude =
-                isDraw ? 15 * (1 - progress) :
-                20 * (1 - progress);
-
-            const direction = i % 2 === 0 ? 1 : -1;
-
-            const movement =
-                direction * amplitude;
-
-            let position = base + movement;
-
-            position = Math.max(2, Math.min(98, position));
-
-            if (i === swings - 1) {
-                position = target;
+        animateBattle(
+            result,
+            token,
+            () => animationToken,
+            {
+                battleBar,
+                battleStatus,
+                continueBattleButton
             }
-
-            battleBar.style.transition =
-                `width ${stepDuration}ms ease-in-out`;
-
-            battleBar.style.width = `${position}%`;
-
-            await wait(stepDuration);
-
-            if (token !== animationToken) return;
-        }
-
-        // ======================================
-        // REVEAL RESULT
-        // ======================================
-
-        if (isDraw) {
-
-            battleStatus.textContent = "IT'S A DRAW!";
-            battleStatus.className = "draw-result";
-
-        } else if (result.againstAllOdds) {
-
-            const winnerName =
-                result.winner === "attacker"
-                    ? result.characterA.name
-                    : result.characterB.name;
-
-            battleStatus.textContent =
-                `AGAINST ALL ODDS! ${winnerName.toUpperCase()} WINS!`;
-
-            battleStatus.className = "against-odds-result";
-
-        } else {
-
-            const winnerName =
-                result.winner === "attacker"
-                    ? result.characterA.name
-                    : result.characterB.name;
-
-            battleStatus.textContent =
-                `${winnerName.toUpperCase()} WINS!`;
-
-            battleStatus.className =
-                result.winner === "attacker"
-                    ? "attacker-result"
-                    : "defender-result";
-        }
-
-        continueBattleButton.hidden = false;
+        );
     }
 
     // ==========================================

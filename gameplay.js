@@ -151,8 +151,31 @@ export function createGame(characters) {
 
         gameState.activeBattle = null;
 
-        const completedMatchups =
-            gameState.matchups.filter(result => result !== null);
+        // ==========================================
+        // DEBUG: ALL BATTLES SO FAR
+        // ==========================================
+
+        const completedMatchups = gameState.matchups.filter(result => result !== null);
+
+        console.table(completedMatchups.map(result => ({
+            battle: result.index + 1,
+
+            attacker: result.characterA.name,
+            attackerPower: Number(result.attackA.power.toFixed(2)),
+            attackerWin: `${(result.attackerWinChance * 100).toFixed(1)}%`,
+
+            defender: result.characterB.name,
+            defenderPower: Number(result.attackB.power.toFixed(2)),
+            defenderWin: `${(result.defenderWinChance * 100).toFixed(1)}%`,
+
+            drawChance: `${(result.drawChance * 100).toFixed(1)}%`,
+
+            winner: result.winner === "attacker"
+                ? result.characterA.name
+                : result.winner === "defender"
+                    ? result.characterB.name
+                    : "DRAW"
+        })));
 
         // All five battles completed.
 

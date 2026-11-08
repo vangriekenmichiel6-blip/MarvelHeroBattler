@@ -6,7 +6,7 @@
 // All calculations are directional: attacker attacks defender.
 // The same function is called again with the characters reversed.
 
-const CLOSE_BATTLE_RANGE = 0.15;
+const CLOSE_BATTLE_RANGE = 0.25;
 
 
 function logarithmicScale(value, minValue, maxValue, outputMin, outputMax) {
@@ -239,18 +239,23 @@ export function calculateBattles(attackers, defenders) {
 
     
     console.table(results.map(result => ({
-        matchup: result.index + 1,
+        battle: result.index + 1,
+
         attacker: result.characterA.name,
+        attackerPower: Number(result.attackA.power.toFixed(2)),
+        attackerWin: `${(result.attackerWinChance * 100).toFixed(1)}%`,
+
         defender: result.characterB.name,
-        attackerPower: Number(result.attackA.power.toFixed(4)),
-        defenderPower: Number(result.attackB.power.toFixed(4)),
-        difference: Number(result.relativeDifference.toFixed(4)),
-        attackerWinChance: `${(result.attackerWinChance * 100).toFixed(1)}%`,
-        defenderWinChance: `${(result.defenderWinChance * 100).toFixed(1)}%`,
+        defenderPower: Number(result.attackB.power.toFixed(2)),
+        defenderWin: `${(result.defenderWinChance * 100).toFixed(1)}%`,
+
         drawChance: `${(result.drawChance * 100).toFixed(1)}%`,
-        closeBattle: result.closeBattle,
-        againstAllOdds: result.againstAllOdds,
-        winner: result.winner ?? "Draw"
+
+        winner: result.winner === "attacker"
+            ? result.characterA.name
+            : result.winner === "defender"
+                ? result.characterB.name
+                : "DRAW"
     })));
 
 
