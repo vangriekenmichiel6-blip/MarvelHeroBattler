@@ -147,7 +147,20 @@ export function initializeUI(game) {
 
             const outcome = document.createElement("span");
             outcome.className = "pair-label";
-            outcome.textContent = draw ? "DRAW" : won ? "WON MATCHUP" : "LOST MATCHUP";
+            const againstAllOdds = result.againstAllOdds && won;
+
+            outcome.textContent = draw
+                ? "DRAW"
+                : againstAllOdds
+                    ? "AGAINST ALL ODDS!"
+                    : won
+                        ? "WON MATCHUP"
+                        : "LOST MATCHUP";
+
+            if (againstAllOdds) {
+                card.classList.add("against-odds-card");
+            }
+            
             card.appendChild(outcome);
         } else if (state.attackers[index] !== null && state.defenders[index] !== null) {
             card.classList.add("paired");
@@ -185,14 +198,32 @@ export function initializeUI(game) {
             outcome.className = "result-outcome";
 
             if (result.winner === "attacker") {
-                outcome.textContent = `${result.characterA.name} wins`;
-                outcome.classList.add("attacker-result");
+
+                if (result.againstAllOdds) {
+                    outcome.textContent =
+                        `Against all odds, ${result.characterA.name} won the match!`;
+                    outcome.classList.add("against-odds-result");
+                } else {
+                    outcome.textContent = `${result.characterA.name} wins`;
+                    outcome.classList.add("attacker-result");
+                }
+
             } else if (result.winner === "defender") {
-                outcome.textContent = `${result.characterB.name} wins`;
-                outcome.classList.add("defender-result");
+
+                if (result.againstAllOdds) {
+                    outcome.textContent =
+                        `Against all odds, ${result.characterB.name} won the match!`;
+                    outcome.classList.add("against-odds-result");
+                } else {
+                    outcome.textContent = `${result.characterB.name} wins`;
+                    outcome.classList.add("defender-result");
+                }
+
             } else {
+
                 outcome.textContent = "Draw";
                 outcome.classList.add("draw-result");
+
             }
 
             row.append(names, outcome);

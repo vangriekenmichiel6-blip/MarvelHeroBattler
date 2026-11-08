@@ -503,3 +503,12 @@ body {
     font-size: 1.2rem;
     font-weight: bold;
 }
+
+.against-odds-result {
+    color: #e0a32e;
+    font-weight: bold;
+}
+
+.against-odds-card {
+    border-color: #e0a32e;
+}

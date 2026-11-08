@@ -81,6 +81,7 @@ export function calculateAttackPower(attacker, defender) {
 // MATCHUP CALCULATION
 // ==========================================
 
+
 export function calculateMatchup(characterA, characterB, index) {
     const attackA = calculateAttackPower(characterA, characterB);
     const attackB = calculateAttackPower(characterB, characterA);
@@ -93,56 +94,87 @@ export function calculateMatchup(characterA, characterB, index) {
 
     const relativeDifference = powerDifference / higherPower;
 
-    let winner = null;
-    let closeBattle = false;
-    let attackerWinChance = 0;
+    // ==========================================
+    // BASE WIN PROBABILITIES
+    // ==========================================
 
-    // ==========================================
-    // CLOSE BATTLE: RANDOM WINNER
-    // ==========================================
+    let baseAttackerWinChance = 0.5;
 
     if (relativeDifference < CLOSE_BATTLE_RANGE) {
-
-        closeBattle = true;
-
-        // The stronger character's advantage increases
-        // linearly with the power difference.
 
         const strongerWinChance =
             0.5 + 0.5 * (relativeDifference / CLOSE_BATTLE_RANGE);
 
-        // Calculate attacker A's actual winning chance.
-
         if (powerA > powerB) {
-            attackerWinChance = strongerWinChance;
+            baseAttackerWinChance = strongerWinChance;
         } else if (powerB > powerA) {
-            attackerWinChance = 1 - strongerWinChance;
-        } else {
-            attackerWinChance = 0.5;
+            baseAttackerWinChance = 1 - strongerWinChance;
         }
 
-        // Randomly determine the winner.
+    } else {
 
-        winner = Math.random() < attackerWinChance
-            ? "attacker"
-            : "defender";
+        baseAttackerWinChance = powerA > powerB ? 1 : 0;
 
     }
 
+    const baseDefenderWinChance = 1 - baseAttackerWinChance;
+
     // ==========================================
-    // NORMAL BATTLE: STRONGER ALWAYS WINS
+    // DRAW PROBABILITY
     // ==========================================
 
-    else {
+    const drawChance = relativeDifference < CLOSE_BATTLE_RANGE
+        ? 0.25 * (1 - relativeDifference / CLOSE_BATTLE_RANGE)
+        : 0;
 
-        if (powerA > powerB) {
-            winner = "attacker";
-            attackerWinChance = 1;
-        } else if (powerB > powerA) {
-            winner = "defender";
-            attackerWinChance = 0;
-        }
+    // ==========================================
+    // FINAL WIN PROBABILITIES
+    // ==========================================
+
+    const attackerWinChance =
+        baseAttackerWinChance * (1 - drawChance);
+
+    const defenderWinChance =
+        baseDefenderWinChance * (1 - drawChance);
+
+    // ==========================================
+    // CLOSE BATTLE
+    // ==========================================
+
+    const underdogWinChance = Math.min(
+        attackerWinChance,
+        defenderWinChance
+    );
+
+    const closeBattle = underdogWinChance >= 0.35;
+
+    // ==========================================
+    // DETERMINE OUTCOME
+    // ==========================================
+
+    const random = Math.random();
+
+    let winner;
+
+    if (random < drawChance) {
+        winner = null;
+    } else if (random < drawChance + attackerWinChance) {
+        winner = "attacker";
+    } else {
+        winner = "defender";
     }
+
+    // ==========================================
+    // AGAINST ALL ODDS
+    // ==========================================
+
+    const winnerWinChance =
+        winner === "attacker" ? attackerWinChance :
+        winner === "defender" ? defenderWinChance :
+        null;
+
+    const againstAllOdds =
+        winner !== null && winnerWinChance < 0.35;
 
     return {
         index,
@@ -153,10 +185,15 @@ export function calculateMatchup(characterA, characterB, index) {
         winner,
         closeBattle,
         attackerWinChance,
+        defenderWinChance,
+        drawChance,
+        winnerWinChance,
+        againstAllOdds,
         powerDifference,
         relativeDifference
     };
 }
+
 
 
 // ==========================================
@@ -200,6 +237,7 @@ export function calculateBattles(attackers, defenders) {
 
     console.group("MARVEL BATTLE — POWER DEBUG");
 
+    
     console.table(results.map(result => ({
         matchup: result.index + 1,
         attacker: result.characterA.name,
@@ -208,9 +246,13 @@ export function calculateBattles(attackers, defenders) {
         defenderPower: Number(result.attackB.power.toFixed(4)),
         difference: Number(result.relativeDifference.toFixed(4)),
         attackerWinChance: `${(result.attackerWinChance * 100).toFixed(1)}%`,
+        defenderWinChance: `${(result.defenderWinChance * 100).toFixed(1)}%`,
+        drawChance: `${(result.drawChance * 100).toFixed(1)}%`,
         closeBattle: result.closeBattle,
+        againstAllOdds: result.againstAllOdds,
         winner: result.winner ?? "Draw"
     })));
+
 
     for (const result of results) {
 
