@@ -142,8 +142,8 @@ export function calculateMatchup(characterA, characterB, index) {
     // ==========================================
 
     const underdogWinChance = Math.min(
-        attackerWinChance,
-        defenderWinChance
+        baseAttackerWinChance,
+        baseDefenderWinChance
     );
 
     const closeBattle = underdogWinChance >= 0.35;
@@ -169,8 +169,8 @@ export function calculateMatchup(characterA, characterB, index) {
     // ==========================================
 
     const winnerWinChance =
-        winner === "attacker" ? attackerWinChance :
-        winner === "defender" ? defenderWinChance :
+        winner === "attacker" ? baseAttackerWinChance :
+        winner === "defender" ? baseDefenderWinChance :
         null;
 
     const againstAllOdds =
@@ -190,7 +190,9 @@ export function calculateMatchup(characterA, characterB, index) {
         winnerWinChance,
         againstAllOdds,
         powerDifference,
-        relativeDifference
+        relativeDifference,
+        baseAttackerWinChance,
+        baseDefenderWinChance,
     };
 }
 
@@ -243,10 +245,12 @@ export function calculateBattles(attackers, defenders) {
 
         attacker: result.characterA.name,
         attackerPower: Number(result.attackA.power.toFixed(2)),
+        baseAttackerWin: `${(result.baseAttackerWinChance * 100).toFixed(1)}%`,
         attackerWin: `${(result.attackerWinChance * 100).toFixed(1)}%`,
 
         defender: result.characterB.name,
         defenderPower: Number(result.attackB.power.toFixed(2)),
+        baseDefenderWin: `${(result.baseDefenderWinChance * 100).toFixed(1)}%`,
         defenderWin: `${(result.defenderWinChance * 100).toFixed(1)}%`,
 
         drawChance: `${(result.drawChance * 100).toFixed(1)}%`,
