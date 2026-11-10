@@ -18,3 +18,35 @@ Open `index.html` through a local web server (for example, VS Code Live Server).
 
 ## Adding characters
 Add characters to `data/characters.csv` using the existing semicolon-separated format. No JavaScript changes are needed for ordinary character additions.
+
+
+## Faction selection
+
+After selecting 5v5 or Tournament, choose a faction setup:
+- `Heroes vs Villains`: `Hero=yes` characters are assigned to attackers and `Hero=no` characters to defenders.
+- `Heroes Only` / `Villains Only`: both teams are drawn from the selected faction.
+- `Mixed Teams`: both teams are drawn from the full character list.
+
+The `Hero` column in `data/characters.csv` is the source of truth. Use `yes` for heroes and `no` for villains. 5v5 needs at least 5 characters per side; Tournament needs at least 15 per side.
+
+## Locations
+
+`locations.js` contains the Marvel locations, their image URLs, descriptions, and stat effects. Each matchup has a 60% chance of receiving a location. A location is selected at most once per game; unused pairs show "NO LOCATION".
+
+Supported location effect groups:
+- `set`: replace a stat with an exact value (for example `sorcery: 0`).
+- `max`: impose an upper limit (for example `flying: 2`).
+- `add`: add to a stat.
+- `multiply`: multiply a stat.
+
+Example:
+
+```js
+effects: {
+    set: { sorcery: 0 },
+    max: { flying: 2 },
+    add: { armor: 1 }
+}
+```
+
+Location effects are applied to temporary stat copies for battle calculations. The character objects and CSV values are not modified. Add or remove locations in the `LOCATIONS` array; the game automatically prevents duplicates within a match.

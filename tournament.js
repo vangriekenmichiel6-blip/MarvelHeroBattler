@@ -1,26 +1,33 @@
-import { shuffle } from "./basics.js";
 import { calculateMatchup } from "./battle.js";
+import { createLocationAssignments } from "./locations.js";
+import { getEligibleCharacters, createTeams } from "./gameplay.js";
 
 const BOARD_SIZE = 5;
 const CHARACTERS_PER_PLAYER = 15;
 
-export function createTournamentGame(characters) {
-    if (!Array.isArray(characters) || characters.length < CHARACTERS_PER_PLAYER * 2) {
-        throw new Error(`Tournament mode requires at least ${CHARACTERS_PER_PLAYER * 2} characters.`);
+export function createTournamentGame(characters, factionMode = "mixed") {
+    const eligible = getEligibleCharacters(characters, factionMode);
+    if (!Array.isArray(characters) || eligible.length < CHARACTERS_PER_PLAYER * 2) {
+        throw new Error(`Tournament with this selection requires at least ${CHARACTERS_PER_PLAYER * 2} eligible characters.`);
     }
-
-    const roster = shuffle([...characters]).slice(0, CHARACTERS_PER_PLAYER * 2);
+    if (factionMode === "heroes-villains" &&
+        (eligible.filter(c => c.hero).length < CHARACTERS_PER_PLAYER ||
+         eligible.filter(c => !c.hero).length < CHARACTERS_PER_PLAYER)) {
+        throw new Error(`Heroes vs Villains tournament requires at least ${CHARACTERS_PER_PLAYER} heroes and ${CHARACTERS_PER_PLAYER} villains.`);
+    }
     let gameState;
 
     function resetGame() {
-        const shuffled = shuffle([...roster]);
+        const [attackerDeck, defenderDeck] = createTeams(eligible, factionMode, CHARACTERS_PER_PLAYER);
         gameState = {
             mode: "tournament",
+            factionMode,
+            locations: createLocationAssignments(BOARD_SIZE),
             attackers: Array(BOARD_SIZE).fill(null),
             defenders: Array(BOARD_SIZE).fill(null),
             matchups: Array(BOARD_SIZE).fill(null),
-            attackerDeck: shuffled.slice(0, CHARACTERS_PER_PLAYER),
-            defenderDeck: shuffled.slice(CHARACTERS_PER_PLAYER),
+            attackerDeck,
+            defenderDeck,
             pendingCharacter: null,
             nextSide: "attacker",
             activeBattle: null,
@@ -71,13 +78,13 @@ export function createTournamentGame(characters) {
 
         if (attackerAlive === 0 && !attackerHasCards) {
             finishGame(defenderAlive > 0 || defenderHasCards ? "defender" : "draw",
-                "The attackers have no heroes left.");
+                "The attackers have no characters left.");
             return true;
         }
 
         if (defenderAlive === 0 && !defenderHasCards) {
             finishGame(attackerAlive > 0 || attackerHasCards ? "attacker" : "draw",
-                "The defenders have no heroes left.");
+                "The defenders have no characters left.");
             return true;
         }
 
@@ -85,7 +92,7 @@ export function createTournamentGame(characters) {
         if (!attackerHasCards && !defenderHasCards) {
             const winner = attackerAlive > defenderAlive ? "attacker" :
                 defenderAlive > attackerAlive ? "defender" : "draw";
-            finishGame(winner, "Both decks are empty. The surviving heroes decide the result.");
+            finishGame(winner, "Both decks are empty. The surviving characters decide the result.");
             return true;
         }
 
@@ -94,7 +101,7 @@ export function createTournamentGame(characters) {
         if (!attackerCanPlay && !defenderCanPlay) {
             const winner = attackerAlive > defenderAlive ? "attacker" :
                 defenderAlive > attackerAlive ? "defender" : "draw";
-            finishGame(winner, "Neither side can make another placement. The surviving heroes decide the result.");
+            finishGame(winner, "Neither side can make another placement. The surviving characters decide the result.");
             return true;
         }
         return false;
@@ -137,7 +144,7 @@ export function createTournamentGame(characters) {
         const defender = gameState.defenders[index];
 
         if (attacker && defender) {
-            const result = calculateMatchup(attacker, defender, index);
+            const result = calculateMatchup(attacker, defender, index, gameState.locations[index]);
             result.battleNumber = gameState.battleHistory.length + 1;
             gameState.matchups[index] = result;
             gameState.activeBattle = result;
@@ -161,7 +168,7 @@ export function createTournamentGame(characters) {
         } else if (result.winner === "defender") {
             gameState.attackers[result.index] = null;
         } else {
-            // Draw: neither hero is eliminated; return both to their own shuffled decks.
+            // Draw: neither character is eliminated; return both to their own shuffled decks.
             gameState.attackers[result.index] = null;
             gameState.defenders[result.index] = null;
             gameState.attackerDeck = shuffle([...gameState.attackerDeck, result.characterA]);

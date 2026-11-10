@@ -1,3 +1,5 @@
+import { applyLocationToStats } from "./locations.js";
+
 
 // ==========================================
 // BATTLE POWER CALCULATIONS
@@ -82,9 +84,11 @@ export function calculateAttackPower(attacker, defender) {
 // ==========================================
 
 
-export function calculateMatchup(characterA, characterB, index) {
-    const attackA = calculateAttackPower(characterA, characterB);
-    const attackB = calculateAttackPower(characterB, characterA);
+export function calculateMatchup(characterA, characterB, index, location = null) {
+    const effectiveA = { ...characterA, stats: applyLocationToStats(characterA.stats, location) };
+    const effectiveB = { ...characterB, stats: applyLocationToStats(characterB.stats, location) };
+    const attackA = calculateAttackPower(effectiveA, effectiveB);
+    const attackB = calculateAttackPower(effectiveB, effectiveA);
 
     const powerA = attackA.power;
     const powerB = attackB.power;
@@ -180,6 +184,9 @@ export function calculateMatchup(characterA, characterB, index) {
         index,
         characterA,
         characterB,
+        location,
+        effectiveStatsA: effectiveA.stats,
+        effectiveStatsB: effectiveB.stats,
         attackA,
         attackB,
         winner,

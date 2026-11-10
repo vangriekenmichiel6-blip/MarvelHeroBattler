@@ -181,14 +181,43 @@ export function initializeUI(game) {
 
         for (let i = 0; i < 5; i++) {
 
-            matchupGrid.appendChild(
-                createCharacterCard("attacker", i, state)
-            );
-
-            matchupGrid.appendChild(
-                createCharacterCard("defender", i, state)
-            );
+            matchupGrid.appendChild(createCharacterCard("attacker", i, state));
+            matchupGrid.appendChild(createLocationCard(i, state.locations?.[i] || null));
+            matchupGrid.appendChild(createCharacterCard("defender", i, state));
         }
+    }
+
+    function createLocationCard(index, location) {
+        const card = document.createElement("div");
+        card.className = location ? "location-card" : "location-card location-none";
+
+        if (!location) {
+            card.textContent = "NO LOCATION";
+            return card;
+        }
+
+        const image = document.createElement("img");
+        image.src = location.imageURL || "";
+        image.alt = location.name;
+        image.loading = "lazy";
+        image.onerror = () => { image.hidden = true; };
+
+        const name = document.createElement("span");
+        name.className = "location-name";
+        name.textContent = location.name;
+
+        const info = document.createElement("button");
+        info.type = "button";
+        info.className = "location-info";
+        info.textContent = "ⓘ";
+        info.title = `About ${location.name}`;
+        info.setAttribute("aria-label", `Description of ${location.name}`);
+        info.addEventListener("click", () => {
+            window.alert(`${location.name}\\n\\n${location.description}`);
+        });
+
+        card.append(image, name, info);
+        return card;
     }
 
     function createCharacterCard(side, index, state) {
@@ -348,7 +377,9 @@ export function initializeUI(game) {
         battlePopup.hidden = false;
 
         battleTitle.textContent =
-            `MATCHUP ${result.index + 1}`;
+            result.location
+                ? `MATCHUP ${result.index + 1} · ${result.location.name.toUpperCase()}`
+                : `MATCHUP ${result.index + 1}`;
 
         battleNameA.textContent = result.characterA.name;
         battleNameB.textContent = result.characterB.name;
@@ -436,7 +467,8 @@ export function initializeUI(game) {
 
             const names = document.createElement("span");
             names.className = "result-names";
-            names.textContent = `${result.characterA.name} vs ${result.characterB.name}`;
+            names.textContent = `${result.characterA.name} vs ${result.characterB.name}` +
+                (result.location ? ` · ${result.location.name}` : " · No location");
 
             const outcome = document.createElement("span");
             outcome.className = "result-outcome";

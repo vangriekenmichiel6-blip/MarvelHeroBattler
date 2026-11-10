@@ -26,9 +26,35 @@
             </button>
             <button class="mode-button" data-game-mode="tournament">
                 <strong>TOURNAMENT</strong>
-                <span>15 heroes each. Fight until one side is defeated.</span>
+                <span>15 characters each. Fight until one side is defeated.</span>
             </button>
         </div>
+    </section>
+
+    <section id="factionSelectScreen" class="mode-select-screen" hidden>
+        <header class="header">
+            <h1>CHOOSE YOUR SIDES</h1>
+            <p>Who is allowed to enter the battlefield?</p>
+        </header>
+        <div class="mode-buttons">
+            <button class="mode-button" data-faction-mode="heroes-villains">
+                <strong>HEROES VS VILLAINS</strong>
+                <span>Heroes on one side, villains on the other.</span>
+            </button>
+            <button class="mode-button" data-faction-mode="heroes">
+                <strong>HEROES ONLY</strong>
+                <span>Both teams are made up exclusively of heroes.</span>
+            </button>
+            <button class="mode-button" data-faction-mode="villains">
+                <strong>VILLAINS ONLY</strong>
+                <span>Both teams are made up exclusively of villains.</span>
+            </button>
+            <button class="mode-button" data-faction-mode="mixed">
+                <strong>MIXED TEAMS</strong>
+                <span>Heroes and villains can fight together on either side.</span>
+            </button>
+        </div>
+        <button id="backToModesFromFaction" class="reset-button">BACK TO GAME MODES</button>
     </section>
 
     <main id="gameScreen" class="game-container" hidden>

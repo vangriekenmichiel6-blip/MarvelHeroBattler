@@ -843,3 +843,91 @@ body {
 #winnerCloseButton:hover {
     background: #ff4247;
 }
+
+
+/* LOCATION BETWEEN THE TWO SLOTS OF EACH MATCHUP */
+.matchup-grid {
+    grid-template-columns: minmax(0, 1fr) 76px minmax(0, 1fr);
+    align-items: stretch;
+}
+
+.location-card {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 5px 2px;
+    background: #171a23;
+    border: 1px solid #555;
+    border-radius: 9px;
+    text-align: center;
+    align-self: stretch;
+}
+
+.location-card img {
+    width: 100%;
+    height: 62px;
+    object-fit: cover;
+    border-radius: 5px;
+    background: #101116;
+}
+
+.location-name {
+    color: #e6c76b;
+    font-size: 10px;
+    line-height: 1.15;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.location-info {
+    width: 23px;
+    height: 23px;
+    padding: 0;
+    border: 1px solid #777;
+    border-radius: 50%;
+    background: #292c38;
+    color: white;
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.location-info:hover {
+    background: #e6c76b;
+    color: #111;
+}
+
+.location-none {
+    color: #666;
+    border-style: dashed;
+    font-size: 9px;
+    font-weight: bold;
+    writing-mode: vertical-rl;
+    letter-spacing: 1px;
+}
+
+@media (max-width: 420px) {
+    .matchup-grid {
+        grid-template-columns: minmax(0, 1fr) 62px minmax(0, 1fr);
+        gap: 6px;
+    }
+
+    .location-card {
+        padding: 4px 2px;
+    }
+
+    .location-card img {
+        height: 52px;
+    }
+
+    .location-name {
+        font-size: 9px;
+    }
+
+    .character-card {
+        padding: 8px 3px;
+    }
+}
